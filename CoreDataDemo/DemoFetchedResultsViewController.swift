@@ -1,9 +1,8 @@
 //
 //  DemoFetchedResultsViewController.swift
-//  DemoArcade
+//  CoreDataDemo
 //
-//  Created by Jonathan Rasmusson Work Pro on 2020-03-16.
-//  Copyright © 2020 Rasmusson Software Consulting. All rights reserved.
+//  Created by Sebastian Strus on 2022-01-30.
 //
 
 import UIKit
@@ -16,39 +15,23 @@ class DemoFetchedResultsViewController: UIViewController {
     let viewContext = CoreDataManager.shared.persistentContainer.viewContext
     
     private lazy var textField: UITextField = {
-        let textField = UITextField()
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.font = UIFont.preferredFont(forTextStyle: .body)
-        textField.layer.sublayerTransform = CATransform3DMakeTranslation(8, 0, 0);
-        textField.backgroundColor = .white
-        textField.layer.borderColor = UIColor.white.cgColor
-        textField.autocorrectionType = .no
-        textField.layer.borderWidth = 1
-        textField.layer.cornerRadius = 5
+        let textField = UITextField(placeholder: "Employee's name")
         return textField
     }()
     
     private lazy var addButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle("Add", for: .normal)
-        button.titleLabel?.adjustsFontSizeToFitWidth = true
-        button.backgroundColor = .systemBlue
-        button.layer.cornerRadius = 5
-        button.setContentHuggingPriority(UILayoutPriority.defaultHigh, for: .horizontal)
+        let button = UIButton(title: "Add")
         button.addTarget(self, action: #selector(addButtonPressed), for: .primaryActionTriggered)
-        
         return button
     }()
     
     private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        
         return tableView
     }()
     
-    let cellId = "insertCellId"
+    let cellId = "Cell"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -110,7 +93,6 @@ class DemoFetchedResultsViewController: UIViewController {
         
     }
     
-    // 3
     func loadSavedData() {
         if fetchedResultsController == nil {
             let request = NSFetchRequest<Employee>(entityName: "Employee")
@@ -131,7 +113,6 @@ class DemoFetchedResultsViewController: UIViewController {
     }
     
     // MARK: - Actions
-    
     @objc
     func addButtonPressed() {
         guard let name = textField.text else { return }
@@ -141,8 +122,11 @@ class DemoFetchedResultsViewController: UIViewController {
 }
 
 // MARK:  - UITableView DataSource
-
-extension DemoFetchedResultsViewController: UITableViewDataSource, UITableViewDelegate {
+extension DemoFetchedResultsViewController: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        let sectionInfo = fetchedResultsController.sections![section]
+        return sectionInfo.numberOfObjects
+    }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
@@ -151,8 +135,11 @@ extension DemoFetchedResultsViewController: UITableViewDataSource, UITableViewDe
         cell.accessoryType = UITableViewCell.AccessoryType.none
         return cell
     }
-    
-    
+}
+
+// MARK:  - UITableViewDelegate
+extension DemoFetchedResultsViewController: UITableViewDelegate {
+
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let action = UIContextualAction(style: .destructive, title: "Delete", handler: { (action, view, completionHandler) in
             let employee = self.fetchedResultsController.object(at: indexPath)
@@ -161,29 +148,20 @@ extension DemoFetchedResultsViewController: UITableViewDataSource, UITableViewDe
         let configuration = UISwipeActionsConfiguration(actions: [action])
         return configuration
     }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let sectionInfo = fetchedResultsController.sections![section]
-        return sectionInfo.numberOfObjects
-    }
 }
 
-// 8
+// MARK:  - NSFetchedResultsControllerDelegate
 extension DemoFetchedResultsViewController: NSFetchedResultsControllerDelegate {
     
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return fetchedResultsController.sections?.count ?? 0
-    }
-    
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        tableView.beginUpdates() // a
+        tableView.beginUpdates()
     }
     
-    // 6b Update table via delegate callback here.
+    // Update table via delegate callback here.
     func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch type {
         case .insert:
-            tableView.insertRows(at: [newIndexPath!], with: .fade) // b
+            tableView.insertRows(at: [newIndexPath!], with: .fade)
         case .delete:
             tableView.deleteRows(at: [indexPath!], with: .fade)
         case .update:
@@ -200,21 +178,3 @@ extension DemoFetchedResultsViewController: NSFetchedResultsControllerDelegate {
     }
 }
 
-
-
-
-
-
-
-
-
-extension UIFont {
-    func withTraits(traits: UIFontDescriptor.SymbolicTraits) -> UIFont {
-        let descriptor = fontDescriptor.withSymbolicTraits(traits)
-        return UIFont(descriptor: descriptor!, size: 0)
-    }
-    
-    func bold() -> UIFont {
-        return withTraits(traits: .traitBold)
-    }
-}

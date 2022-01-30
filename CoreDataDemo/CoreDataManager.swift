@@ -12,7 +12,6 @@ struct CoreDataManager {
     static let shared = CoreDataManager()
 
     let persistentContainer: NSPersistentContainer = {
-
         let container = NSPersistentContainer(name: "CoreDataDemo")
         container.loadPersistentStores { (storeDescription, error) in
             if let error = error {
@@ -24,15 +23,9 @@ struct CoreDataManager {
     
     @discardableResult
     func createEmployee(name: String) -> Employee? {
-        print("Name: \(name)")
         let context = persistentContainer.viewContext
         
-        // old way
-        // let employee = NSEntityDescription.insertNewObject(forEntityName: "Employee", into: context) as! Employee // NSManagedObject
-        
-        // new way
         let employee = Employee(context: context)
-
         employee.name = name
 
         do {
@@ -41,7 +34,6 @@ struct CoreDataManager {
         } catch let error {
             print("Failed to create: \(error)")
         }
-
         return nil
     }
 
@@ -52,10 +44,9 @@ struct CoreDataManager {
 
         do {
             let employees = try context.fetch(fetchRequest)
-            print("employees: \(employees)")
             return employees
         } catch let error {
-            print("Failed to fetch companies: \(error)")
+            print("Failed to fetch employees: \(error)")
         }
 
         return nil
