@@ -19,7 +19,7 @@ class DemoFetchedResultsViewController: UIViewController {
         let textField = UITextField()
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.font = UIFont.preferredFont(forTextStyle: .body)
-        textField.textAlignment = .center
+        textField.layer.sublayerTransform = CATransform3DMakeTranslation(8, 0, 0);
         textField.backgroundColor = .white
         textField.layer.borderColor = UIColor.white.cgColor
         textField.autocorrectionType = .no
